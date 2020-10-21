@@ -135,7 +135,7 @@ class NodeCreator:
         for props_tuple in self.properties:
             prop, value = props_tuple
             if isinstance(value, ImageUser):
-                statements.append("""\
+                statements.append(f"""\
 img_text = new_node.{prop}")
 img_text.frame_current = {value.frame_current}
 img_text.frame_duration = {value.frame_duration}

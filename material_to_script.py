@@ -1,12 +1,8 @@
 """
 This scripts "serializes" the active material of the currently selected object
 And creates a script readable by the Blender API to recreate said Material.
-
 As any Blender script, it is free to use in any way shape or form.
-
-V 0.9 - 20.10.21
-
-TODO : Fix the Point Density Node's particle system field
+V 1.0 - 20.10.21
 """
 
 import bpy
@@ -148,11 +144,11 @@ img_text.tile = {value.tile}\
                 continue
             if isinstance(value, ParticleSystem):
                 # /!\ Make sure this is executed after the node.object statement
-                # /!\ Very buggy if there is more than one Particle System                
+                print(value.name)            
                 statements.append(f"""\
 obj = new_node.object             
 if new_node.object:           
-    ps_mod = obj.modifiers.get('ParticleSettings')   
+    ps_mod = obj.modifiers.get({value.name})   
     if ps_mod:
         new_node.{prop} = ps_mod.particle_system\
                 """)
@@ -285,14 +281,12 @@ def serialize_material(mat):
     nt = mat.node_tree
     statements = [f"""\
 import bpy
-
 new_mat = bpy.data.materials.get('{mat.name}')
 if not new_mat:
     new_mat = bpy.data.materials.new('{mat.name}')
     
 new_mat.use_nodes = True
 node_tree = new_mat.node_tree
-
 nodes = node_tree.nodes
 nodes.clear()
     

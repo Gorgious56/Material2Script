@@ -2,13 +2,16 @@
 This scripts "serializes" the active material of the currently selected object
 And creates a script readable by the Blender API to recreate said Material.
 As any Blender script, it is free to use in any way shape or form.
-V 1.0 - 20.10.21
+V 1.1 - 20.10.23
+
+Fixed NodeSocketVirtual error
 """
 
 import bpy
 
 from bpy.types import (
     NodeSocketShader,
+    NodeSocketVirtual,
     NodeSocketVector,
     NodeSocketVectorDirection,
     NodeSocketVectorXYZ,
@@ -32,6 +35,8 @@ from bpy.types import (
 from mathutils import Vector, Color
 
 
+ERROR = "~ ERROR ~"
+
 def get_link_statement(link):
     """
     Build the statement to re-create given link
@@ -47,8 +52,8 @@ def value_from_socket(socket):
     Returns the evaluated value of a node socket's default value
     """
     # A Shader socket (green dot) doesn't have a default value :
-    if isinstance(socket, NodeSocketShader):
-        return NodeSocketShader.__name__
+    if isinstance(socket, (NodeSocketShader, NodeSocketVirtual)):
+        return ERROR
     elif isinstance(socket, (
             NodeSocketVector,
             NodeSocketVectorXYZ,
@@ -265,12 +270,12 @@ if parent:
             else:
                 statements.append(f"new_node.{prop} = {value}")
         for i, dv in enumerate(self.input_default_values):
-            if dv == NodeSocketShader.__name__:
+            if dv == ERROR:
                 continue
             statements.append(f"new_node.inputs[{i}].default_value = {dv}")
 
         for i, dv in enumerate(self.output_default_values):
-            if dv == NodeSocketShader.__name__:
+            if dv == ERROR:
                 continue
             statements.append(f"new_node.outputs[{i}].default_value = {dv}")
 

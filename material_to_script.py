@@ -3,7 +3,6 @@ This scripts "serializes" the active material of the currently selected object
 And creates a script readable by the Blender API to recreate said Material.
 As any Blender script, it is free to use in any way shape or form.
 V 1.1 - 20.10.23
-
 Fixed NodeSocketVirtual error
 """
 
@@ -140,11 +139,10 @@ class NodeCreator:
         statements = []
         statements.append(f"new_node = nodes.new(type='{self.type}')")
         self.properties = sorted(self.properties, key=lambda p: p[0])
-        for props_tuple in self.properties:
-            prop, value = props_tuple
+        for prop, value in self.properties:
             if isinstance(value, ImageUser):
                 statements.append(f"""\
-img_text = new_node.{prop}")
+img_text = new_node.{prop}
 img_text.frame_current = {value.frame_current}
 img_text.frame_duration = {value.frame_duration}
 img_text.frame_offset = {value.frame_offset}
@@ -360,6 +358,3 @@ def get_socket_index(socket):
 
 if __name__ == "__main__":
     text_block = write_material_to_text_block(bpy.context.active_object)
-    # DEBUG Test if the script works by overwriting the current material :
-    # if text_block:
-    #     text_block.as_module()

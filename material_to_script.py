@@ -2,8 +2,11 @@
 This scripts "serializes" the active material of the currently selected object
 And creates a script readable by the Blender API to recreate said Material.
 As any Blender script, it is free to use in any way shape or form.
-V 1.1 - 20.10.23
-Fixed NodeSocketVirtual error
+V 1.1 - 2020-10-23 : Fixed NodeSocketVirtual error, add utility reference files for all shader node
+V 1.2 - 2021-03-16 : Fix leftover string in code generation
+
+Fork - 2025-03-16 : Switch to __repr__ for serialization (for NodeSocketRotation, in Blender 4.3)
+
 """
 
 import bpy
@@ -63,7 +66,9 @@ def value_from_socket(socket):
     elif isinstance(socket, NodeSocketColor):
         return f"{[socket.default_value[i] for i in range(4)]}"
     else:
-        return socket.default_value.__str__()
+        # Euler objects are handled here, by NodeSocketRotation
+        # (by __repr__, which is different from __str__)
+        return socket.default_value.__repr__()
 
 
 class NodeCreator:
@@ -107,6 +112,10 @@ class NodeCreator:
         "show_preview",
         "show_texture",
         "width_hidden",
+
+        # don't know what these are, but they break the material generated code
+        "debug_zone_body_lazy_function_graph",
+        "debug_zone_lazy_function_graph",
     )
 
     def __init__(self, node):
